@@ -112,7 +112,7 @@ func move_handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// call external move function (swap this out for different algs)
-	move := goLeft(body)
+	move := followTail(body)
 
 	resp := MoveResponse{}
 	resp.Move = move
@@ -136,7 +136,7 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Stats Server started on port %s", port)
+	log.Printf("Snake Server started on port %s", port)
 
 	http.HandleFunc("/start", start_handler)
 	http.HandleFunc("/end", end_handler)
