@@ -13,16 +13,16 @@ var HEADTYPE = "beluga"
 var TAILTYPE = "round-bum"
 
 type StartRequest struct {
-	Game	string
-	Turn	string
-	Board	string
-	You		string
+	Game  string `json:"game,omitempty"`
+	Turn  string `json:"turn,omitempty"`
+	Board string `json:"board,omitempty"`
+	You   string `json:"you,omitempty"`
 }
 
 type StartResponse struct {
-	Color 		 string
-	Headtype     string
-	Tailtype     string
+	Color    string
+	Headtype string
+	Tailtype string
 }
 
 // This is the request structure from the gameserver -
@@ -64,15 +64,15 @@ type MoveRequest struct {
 }
 
 type MoveResponse struct {
-	Move 	string
-	Shout 	string
+	Move  string
+	Shout string
 }
 
 type EndRequest struct {
-	Game	string
-	Turn 	string
-	Board 	string
-	You 	string
+	Game  string
+	Turn  string
+	Board string
+	You   string
 }
 
 func start_handler(w http.ResponseWriter, r *http.Request) {
@@ -108,11 +108,11 @@ func move_handler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-        return
+		return
 	}
 
 	// call external move function (swap this out for different algs)
-	move := followTail(body)
+	move := playItSafe(body)
 
 	resp := MoveResponse{}
 	resp.Move = move
