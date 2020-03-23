@@ -166,26 +166,36 @@ func followTail(state MoveRequest) string {
 	}
 }
 
+func possibleMoves(state MoveRequest) []Coordinate {
+	current := state.You.Body[0]
+	possible := []Coordinate{}
+	for _, move := range all_moves {
+		if isSafeMove(state, move) {
+			var coord Coordinate
+			coord.X = current.X + moves[move]["X"]
+			coord.Y = current.Y + moves[move]["Y"]
+			possible = append(possible, coord)
+		}
+	}
+	return possible
+}
+
 func safestSquare(state MoveRequest) Coordinate {
 	best := 0
 	var best_square Coordinate
-	for x := 0; x < state.Board.Width; x++ {
-		for y := 0; y < state.Board.Height; y++ {
-			current := 0
-			for _, snake := range state.Board.Snakes {
-				for _, element := range snake.Body[:len(snake.Body)-1] {
-					current += Abs(x-element.X) + Abs(y-element.Y)
-				}
-			}
-			if current > best {
-				best = current
-				best_square.X = x
-				best_square.Y = y
+	for _, move := range possibleMoves(state) {
+		current := 0
+		for _, snake := range state.Board.Snakes {
+			for _, element := range snake.Body[:len(snake.Body)-1] {
+				current += Abs(move.X-element.X) + Abs(move.Y-element.Y)
 			}
 		}
+		if current > best {
+			best = current
+			best_square.X = move.X
+			best_square.Y = move.Y
+		}
 	}
-	fmt.Println(state.You.Body[0])
-	fmt.Println("best ", best_square)
 	return best_square
 }
 
@@ -218,7 +228,6 @@ func isOtherCollision(state MoveRequest, move string) bool {
 }
 
 func isSafeMove(state MoveRequest, move string) bool {
-	//if(!(isOutOfBounds(state, move)) && !(isSelfCollision(state, move))){
 	if !(isOtherCollision(state, move)) && !(isOutOfBounds(state, move)) {
 		return true
 	}
