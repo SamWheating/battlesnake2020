@@ -13,11 +13,6 @@ func Abs(num int) int {
 	return num
 }
 
-type Coordinate struct {
-	X int
-	Y int
-}
-
 func playItSafe(state MoveRequest) string {
 	if state.You.Health > 30 {
 		return shy(state)
@@ -26,8 +21,7 @@ func playItSafe(state MoveRequest) string {
 	}
 }
 
-func greedy(state MoveRequest) string {
-
+func moveToTarget(state MoveRequest, targetFunc targetFunction) string {
 	safe_moves := make(map[string]bool)
 	for _, move := range all_moves {
 		if isSafeMove(state, move) {
@@ -37,14 +31,8 @@ func greedy(state MoveRequest) string {
 		}
 	}
 
-	fmt.Println(safe_moves)
-
 	current := state.You.Body[0]
-	target := closestFood(state)
-	fmt.Println(target)
-
-	fmt.Println(target.X, current.X, target.Y, current.Y)
-	fmt.Println((target.X < current.X))
+	target := targetFunc(state)
 
 	if (target.X < current.X) && (safe_moves["left"]) {
 		return "left"
@@ -94,76 +82,19 @@ var moves = map[string]map[string]int{
 		"X": 1, "Y": 0},
 }
 
+// Uses a heuristic function to find the safest square on the board
 func shy(state MoveRequest) string {
-
-	safe_moves := make(map[string]bool)
-	for _, move := range all_moves {
-		if isSafeMove(state, move) {
-			safe_moves[move] = true
-		} else {
-			safe_moves[move] = false
-		}
-	}
-
-	current := state.You.Body[0]
-	target := safestSquare(state)
-
-	if (target.X < current.X) && (safe_moves["left"]) {
-		return "left"
-	} else if (target.Y > current.Y) && (safe_moves["down"]) {
-		return "down"
-	} else if (target.X > current.X) && (safe_moves["right"]) {
-		return "right"
-	} else if (target.Y < current.Y) && (safe_moves["up"]) {
-		return "up"
-	} else {
-		for k, v := range safe_moves {
-			if v {
-				return k
-			}
-		}
-		fmt.Println("no safe?")
-		return "down"
-	}
+	return moveToTarget(state, safestSquare)
 }
 
+// Follows its own tail
 func followTail(state MoveRequest) string {
+	return moveToTarget(state, findTail)
+}
 
-	safe_moves := make(map[string]bool)
-	for _, move := range all_moves {
-		if isSafeMove(state, move) {
-			safe_moves[move] = true
-		} else {
-			safe_moves[move] = false
-		}
-	}
-
-	fmt.Println(safe_moves)
-
-	current := state.You.Body[0]
-	target := state.You.Body[len(state.You.Body)-1]
-	fmt.Println(target)
-
-	fmt.Println(target.X, current.X, target.Y, current.Y)
-	fmt.Println((target.X < current.X))
-
-	if (target.X < current.X) && (safe_moves["left"]) {
-		return "left"
-	} else if (target.Y > current.Y) && (safe_moves["down"]) {
-		return "down"
-	} else if (target.X > current.X) && (safe_moves["right"]) {
-		return "right"
-	} else if (target.Y < current.Y) && (safe_moves["up"]) {
-		return "up"
-	} else {
-		for k, v := range safe_moves {
-			if v {
-				return k
-			}
-		}
-		fmt.Println("no safe?")
-		return "down"
-	}
+// Always goes to the nearest food
+func greedy(state MoveRequest) string {
+	return moveToTarget(state, closestFood)
 }
 
 func possibleMoves(state MoveRequest) []Coordinate {
@@ -178,6 +109,13 @@ func possibleMoves(state MoveRequest) []Coordinate {
 		}
 	}
 	return possible
+}
+
+func findTail(state MoveRequest) Coordinate {
+	var tail Coordinate
+	tail.X = state.You.Body[len(state.You.Body)-1].X
+	tail.Y = state.You.Body[len(state.You.Body)-1].Y
+	return tail
 }
 
 func safestSquare(state MoveRequest) Coordinate {
