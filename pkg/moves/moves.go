@@ -1,10 +1,13 @@
 // Define move-computing functions in here to heep main.go clean
 
-package main
+package moves
 
 import (
+	"github.com/SamWheating/battlesnake2020/pkg/structs"
 	"fmt"
 )
+
+type targetFunction func(structs.MoveRequest) structs.Coordinate
 
 func Abs(num int) int {
 	if num < 0 {
@@ -13,15 +16,15 @@ func Abs(num int) int {
 	return num
 }
 
-func playItSafe(state MoveRequest) string {
+func PlayItSafe(state structs.MoveRequest) string {
 	if state.You.Health > 30 {
-		return shy(state)
+		return Shy(state)
 	} else {
-		return greedy(state)
+		return Greedy(state)
 	}
 }
 
-func moveToTarget(state MoveRequest, targetFunc targetFunction) string {
+func moveToTarget(state structs.MoveRequest, targetFunc targetFunction) string {
 	safe_moves := make(map[string]bool)
 	for _, move := range all_moves {
 		if isSafeMove(state, move) {
@@ -53,11 +56,11 @@ func moveToTarget(state MoveRequest, targetFunc targetFunction) string {
 	}
 }
 
-func closestFood(state MoveRequest) Coordinate {
+func closestFood(state structs.MoveRequest) structs.Coordinate {
 	head := state.You.Body[0]
 	all_food := state.Board.Food
 	min := 100000
-	var closest Coordinate
+	var closest structs.Coordinate
 	for _, food := range all_food {
 		distance := Abs(food.X-head.X) + Abs(food.Y-head.Y)
 		if distance < min {
@@ -83,26 +86,27 @@ var moves = map[string]map[string]int{
 }
 
 // Uses a heuristic function to find the safest square on the board
-func shy(state MoveRequest) string {
+func Shy(state structs.MoveRequest) string {
 	return moveToTarget(state, safestSquare)
 }
 
 // Follows its own tail
-func followTail(state MoveRequest) string {
+func FollowTail(state structs.MoveRequest) string {
 	return moveToTarget(state, findTail)
 }
 
 // Always goes to the nearest food
-func greedy(state MoveRequest) string {
+func Greedy(state structs.MoveRequest) string {
 	return moveToTarget(state, closestFood)
 }
 
-func possibleMoves(state MoveRequest) []Coordinate {
+// Examine the space of possible moves and eliminate any non-options
+func possibleMoves(state structs.MoveRequest) []structs.Coordinate {
 	current := state.You.Body[0]
-	possible := []Coordinate{}
+	possible := []structs.Coordinate{}
 	for _, move := range all_moves {
 		if isSafeMove(state, move) {
-			var coord Coordinate
+			var coord structs.Coordinate
 			coord.X = current.X + moves[move]["X"]
 			coord.Y = current.Y + moves[move]["Y"]
 			possible = append(possible, coord)
@@ -111,16 +115,16 @@ func possibleMoves(state MoveRequest) []Coordinate {
 	return possible
 }
 
-func findTail(state MoveRequest) Coordinate {
-	var tail Coordinate
+func findTail(state structs.MoveRequest) structs.Coordinate {
+	var tail structs.Coordinate
 	tail.X = state.You.Body[len(state.You.Body)-1].X
 	tail.Y = state.You.Body[len(state.You.Body)-1].Y
 	return tail
 }
 
-func safestSquare(state MoveRequest) Coordinate {
+func safestSquare(state structs.MoveRequest) structs.Coordinate {
 	best := 0
-	var best_square Coordinate
+	var best_square structs.Coordinate
 	for _, move := range possibleMoves(state) {
 		current := 0
 		for _, snake := range state.Board.Snakes {
@@ -137,7 +141,7 @@ func safestSquare(state MoveRequest) Coordinate {
 	return best_square
 }
 
-func isOutOfBounds(state MoveRequest, move string) bool {
+func isOutOfBounds(state structs.MoveRequest, move string) bool {
 	current := state.You.Body[0]
 	next_x := current.X + moves[move]["X"]
 	next_y := current.Y + moves[move]["Y"]
@@ -150,7 +154,7 @@ func isOutOfBounds(state MoveRequest, move string) bool {
 	return false
 }
 
-func isOtherCollision(state MoveRequest, move string) bool {
+func isOtherCollision(state structs.MoveRequest, move string) bool {
 	snakes := state.Board.Snakes
 	current := state.You.Body
 	next_x := current[0].X + moves[move]["X"]
@@ -165,7 +169,7 @@ func isOtherCollision(state MoveRequest, move string) bool {
 	return false
 }
 
-func isSafeMove(state MoveRequest, move string) bool {
+func isSafeMove(state structs.MoveRequest, move string) bool {
 	if !(isOtherCollision(state, move)) && !(isOutOfBounds(state, move)) {
 		return true
 	}
