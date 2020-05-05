@@ -21,6 +21,6 @@ func main() {
 	http.HandleFunc("/end", handlers.End)
 	http.HandleFunc("/move", handlers.Move)
 	http.HandleFunc("/ping", handlers.Ping)
-
+	http.HandleFunc("/", handlers.Index)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }

@@ -39,6 +39,11 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "OK.")
 }
 
+func Index(w http.ResponseWriter, r *http.Request) {
+	url := "https://www.google.com/search?q=snake&source=lnms&tbm=isch"
+	http.Redirect(w, r, url, 302)
+}
+
 func Move(w http.ResponseWriter, r *http.Request) {
 
 	var body structs.MoveRequest
