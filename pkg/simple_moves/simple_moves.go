@@ -1,10 +1,10 @@
 // Define move-computing functions in here to heep main.go clean
 
-package moves
+package simple_moves
 
 import (
-	"github.com/SamWheating/battlesnake2020/pkg/structs"
 	"fmt"
+	"github.com/SamWheating/battlesnake2020/pkg/structs"
 )
 
 type targetFunction func(structs.MoveRequest) structs.Coordinate
@@ -14,14 +14,6 @@ func Abs(num int) int {
 		return num * -1
 	}
 	return num
-}
-
-func PlayItSafe(state structs.MoveRequest) string {
-	if state.You.Health > 30 {
-		return Shy(state)
-	} else {
-		return Greedy(state)
-	}
 }
 
 func moveToTarget(state structs.MoveRequest, targetFunc targetFunction) string {
@@ -98,6 +90,15 @@ func FollowTail(state structs.MoveRequest) string {
 // Always goes to the nearest food
 func Greedy(state structs.MoveRequest) string {
 	return moveToTarget(state, closestFood)
+}
+
+// Alternate between shy and greedy dependent on hunger level
+func PlayItSafe(state structs.MoveRequest) string {
+	if state.You.Health > 30 {
+		return Shy(state)
+	} else {
+		return Greedy(state)
+	}
 }
 
 // Examine the space of possible moves and eliminate any non-options

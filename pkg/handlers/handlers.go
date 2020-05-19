@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/SamWheating/battlesnake2020/pkg/structs"
-	"github.com/SamWheating/battlesnake2020/pkg/moves"
 	"encoding/json"
 	"fmt"
+	"github.com/SamWheating/battlesnake2020/pkg/simple_moves"
+	"github.com/SamWheating/battlesnake2020/pkg/structs"
 	"net/http"
 )
 
@@ -54,9 +54,9 @@ func Move(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// call external move function (swap this out for different algs)
-	move := moves.PlayItSafe(body)
-	//move := moves.Greedy(body)
-	//move := moves.FollowTail(body)
+	//move := simple_moves.PlayItSafe(body)
+	move := simple_moves.Greedy(body)
+	//move := simple_moves.FollowTail(body)
 
 	resp := structs.MoveResponse{}
 	resp.Move = move
