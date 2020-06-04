@@ -4,7 +4,7 @@ package simple_moves
 
 import (
 	"fmt"
-
+	"github.com/SamWheating/battlesnake2020/pkg/heuristics"
 	"github.com/SamWheating/battlesnake2020/pkg/structs"
 )
 
@@ -102,6 +102,14 @@ func PlayItSafe(state structs.MoveRequest) string {
 	}
 }
 
+func PlayItSafeFlood(state structs.MoveRequest) string {
+	if state.You.Health > 30 {
+		return safestSquareFloodFill(state)
+	} else {
+		return Greedy(state)
+	}
+}
+
 // Examine the space of possible moves and eliminate any non-options
 func possibleMoves(state structs.MoveRequest) []structs.Coordinate {
 	current := state.You.Body[0]
@@ -141,6 +149,35 @@ func safestSquare(state structs.MoveRequest) structs.Coordinate {
 		}
 	}
 	return best_square
+}
+
+// Returns the safest of the immediately surrounding squares
+// based on space found with recursive floodfill
+func safestSquareFloodFill(state structs.MoveRequest) string {
+	current := state.You.Body[0]
+	board := make([][]bool, state.Board.Width)
+	for i := range board {
+		board[i] = make([]bool, state.Board.Height)
+	}
+	for _, snake := range state.Board.Snakes {
+		for _, coord := range snake.Body {
+			board[coord.X][coord.Y] = true
+		}
+	}
+	space := make(map[string]int)
+	space["left"] = heuristics.FloodFill(board, current.Left())
+	space["right"] = heuristics.FloodFill(board, current.Right())
+	space["up"] = heuristics.FloodFill(board, current.Up())
+	space["down"] = heuristics.FloodFill(board, current.Down())
+	// fmt.Println(space) //something is wonky here?
+	best := 0
+	move := ""
+	for k, v := range space {
+		if v > best {
+			move = k
+		}
+	}
+	return move
 }
 
 func isOutOfBounds(state structs.MoveRequest, move string) bool {

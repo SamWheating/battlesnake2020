@@ -5,20 +5,29 @@ import (
 	"fmt"
 	"github.com/SamWheating/battlesnake2020/pkg/simple_moves"
 	"github.com/SamWheating/battlesnake2020/pkg/structs"
+	"math/rand"
 	"net/http"
 )
 
 // These are used to determine the appearance of the snake
-var COLOUR = "#517550"
-var HEADTYPE = "beluga"
-var TAILTYPE = "round-bum"
+func getRandomHex() string {
+	const hexchars = "1234567890ABCDEF"
+	b := make([]byte, 7)
+	for i := range b {
+		b[i] = hexchars[rand.Intn(len(hexchars))]
+	}
+	b[0] = '#'
+	// return a random 24-bit hex colour like #A1B514
+	return string(b)
+}
 
 func Start(w http.ResponseWriter, r *http.Request) {
-
+	HEADTYPES := []string{"beluga", "safe"}
+	TAILTYPES := []string{"round-bum", "curled"}
 	resp := structs.StartResponse{}
-	resp.Color = COLOUR
-	resp.Headtype = HEADTYPE
-	resp.Tailtype = TAILTYPE
+	resp.Color = getRandomHex()
+	resp.Headtype = HEADTYPES[rand.Intn(len(HEADTYPES))]
+	resp.Tailtype = TAILTYPES[rand.Intn(len(TAILTYPES))]
 
 	js, err := json.Marshal(resp)
 	if err != nil {
@@ -54,7 +63,8 @@ func Move(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// call external move function (swap this out for different algs)
-	move := simple_moves.PlayItSafe(body)
+	//move := simple_moves.PlayItSafe(body)
+	move := simple_moves.PlayItSafeFlood(body)
 	//move := simple_moves.Greedy(body)
 	//move := simple_moves.FollowTail(body)
 

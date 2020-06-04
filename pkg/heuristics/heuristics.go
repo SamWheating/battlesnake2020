@@ -15,6 +15,7 @@ func Hunger(state structs.MoveRequest) int {
 }
 
 // Calculates the total reachable spaces from our snake's head
+// Hueristic function (assigns a score to a hypothetical game state)
 func HeadRoom(state structs.MoveRequest) int {
 
 	// Initializ a width x height array of false
@@ -30,15 +31,31 @@ func HeadRoom(state structs.MoveRequest) int {
 	}
 
 	board[state.You.Body[0].X][state.You.Body[0].Y] = false
-
-	// makes board
-	// return floodfill(board, head)
 	return FloodFill(board, state.You.Body[0])
 }
 
-func FloodFill(boardState [][]bool, coord structs.Coordinate) int {
+func FloodFill(originalboardState [][]bool, coord structs.Coordinate) int {
+
+	// Stack-based recursive implementation (four-way)
+
+	// One implicitly stack-based (recursive) flood-fill implementation (for a two-dimensional array) goes as follows:
+
+	// Flood-fill (node, target-color, replacement-color):
+	//  1. If square is occupied, return zero
+	//  3. Else Set the square to occupied AND count += 1
+	//  4. Count += Flood-fill (one step to the south of node, target-color, replacement-color).
+	//     Count += Flood-fill (one step to the north of node, target-color, replacement-color).
+	//     Count += Flood-fill (one step to the west of node, target-color, replacement-color).
+	//     Count += Flood-fill (one step to the east of node, target-color, replacement-color).
+	//  5. Return Count.
+
+	// make a copy of boardstate so that the original can be reused
+
+	boardState := make([][]bool, len(originalboardState))
+	_ = copy(boardState, originalboardState)
 	count := 0
 
+	// Out of the board is bad!
 	if coord.X >= len(boardState) || coord.X < 0 {
 		return 0
 	}
@@ -59,17 +76,3 @@ func FloodFill(boardState [][]bool, coord structs.Coordinate) int {
 	count += FloodFill(boardState, coord.Down())
 	return count
 }
-
-// Stack-based recursive implementation (four-way)
-
-// One implicitly stack-based (recursive) flood-fill implementation (for a two-dimensional array) goes as follows:
-
-// Flood-fill (node, target-color, replacement-color):
-//  1. If target-color is equal to replacement-color, return.
-//  2. ElseIf the color of node is not equal to target-color, return.
-//  3. Else Set the color of node to replacement-color. AND count += 1
-//  4. Perform Flood-fill (one step to the south of node, target-color, replacement-color).
-//     Perform Flood-fill (one step to the north of node, target-color, replacement-color).
-//     Perform Flood-fill (one step to the west of node, target-color, replacement-color).
-//     Perform Flood-fill (one step to the east of node, target-color, replacement-color).
-//  5. Return.
