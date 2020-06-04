@@ -54,8 +54,8 @@ func Move(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// call external move function (swap this out for different algs)
-	//move := simple_moves.PlayItSafe(body)
-	move := simple_moves.Greedy(body)
+	move := simple_moves.PlayItSafe(body)
+	//move := simple_moves.Greedy(body)
 	//move := simple_moves.FollowTail(body)
 
 	resp := structs.MoveResponse{}

@@ -4,6 +4,7 @@ package simple_moves
 
 import (
 	"fmt"
+
 	"github.com/SamWheating/battlesnake2020/pkg/structs"
 )
 
