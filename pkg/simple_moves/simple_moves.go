@@ -44,7 +44,6 @@ func moveToTarget(state structs.MoveRequest, targetFunc targetFunction) string {
 				return k
 			}
 		}
-		fmt.Println("no safe?")
 		return "down"
 	}
 }
@@ -151,6 +150,26 @@ func safestSquare(state structs.MoveRequest) structs.Coordinate {
 	return best_square
 }
 
+// Makes a deep copy of a 2d slice of Bools
+func copy2d(source [][]bool) [][]bool {
+	dest := make([][]bool, len(source))
+	for i := range source {
+		dest[i] = make([]bool, len(source[i]))
+		copy(dest[i], source[i])
+	}
+	return dest
+}
+
+func isInBounds(board [][]bool, coord structs.Coordinate) bool {
+	if coord.X < 0 || coord.Y < 0 {
+		return false
+	}
+	if coord.X >= len(board) || coord.Y >= len(board[0]) {
+		return false
+	}
+	return true
+}
+
 // Returns the safest of the immediately surrounding squares
 // based on space found with recursive floodfill
 func safestSquareFloodFill(state structs.MoveRequest) string {
@@ -163,18 +182,34 @@ func safestSquareFloodFill(state structs.MoveRequest) string {
 		for _, coord := range snake.Body {
 			board[coord.X][coord.Y] = true
 		}
+		// add the spots around the snakes' heads to the no-go zone
+		if snake.ID != state.You.ID {
+			if isInBounds(board, snake.Body[0].Left()) {
+				board[snake.Body[0].Left().X][snake.Body[0].Left().Y] = true
+			}
+			if isInBounds(board, snake.Body[0].Right()) {
+				board[snake.Body[0].Right().X][snake.Body[0].Right().Y] = true
+			}
+			if isInBounds(board, snake.Body[0].Up()) {
+				board[snake.Body[0].Up().X][snake.Body[0].Up().Y] = true
+			}
+			if isInBounds(board, snake.Body[0].Down()) {
+				board[snake.Body[0].Down().X][snake.Body[0].Down().Y] = true
+			}
+		}
 	}
+
 	space := make(map[string]int)
-	space["left"] = heuristics.FloodFill(board, current.Left())
-	space["right"] = heuristics.FloodFill(board, current.Right())
-	space["up"] = heuristics.FloodFill(board, current.Up())
-	space["down"] = heuristics.FloodFill(board, current.Down())
-	// fmt.Println(space) //something is wonky here?
+	space["left"] = heuristics.FloodFill(copy2d(board), current.Left())
+	space["right"] = heuristics.FloodFill(copy2d(board), current.Right())
+	space["up"] = heuristics.FloodFill(copy2d(board), current.Up())
+	space["down"] = heuristics.FloodFill(copy2d(board), current.Down())
 	best := 0
 	move := ""
 	for k, v := range space {
 		if v > best {
 			move = k
+			best = v
 		}
 	}
 	return move

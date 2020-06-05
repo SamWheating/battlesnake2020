@@ -34,7 +34,7 @@ func HeadRoom(state structs.MoveRequest) int {
 	return FloodFill(board, state.You.Body[0])
 }
 
-func FloodFill(originalboardState [][]bool, coord structs.Coordinate) int {
+func FloodFill(boardState [][]bool, coord structs.Coordinate) int {
 
 	// Stack-based recursive implementation (four-way)
 
@@ -51,8 +51,6 @@ func FloodFill(originalboardState [][]bool, coord structs.Coordinate) int {
 
 	// make a copy of boardstate so that the original can be reused
 
-	boardState := make([][]bool, len(originalboardState))
-	_ = copy(boardState, originalboardState)
 	count := 0
 
 	// Out of the board is bad!
