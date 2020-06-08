@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-// These are used to determine the appearance of the snake
+// return a random 24-bit hex colour like #A1B514
 func getRandomHex() string {
 	const hexchars = "1234567890ABCDEF"
 	b := make([]byte, 7)
@@ -17,7 +17,6 @@ func getRandomHex() string {
 		b[i] = hexchars[rand.Intn(len(hexchars))]
 	}
 	b[0] = '#'
-	// return a random 24-bit hex colour like #A1B514
 	return string(b)
 }
 
@@ -25,9 +24,10 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	HEADTYPES := []string{"beluga", "safe"}
 	TAILTYPES := []string{"round-bum", "curled"}
 	resp := structs.StartResponse{}
-	resp.Color = getRandomHex()
+	// These are used to determine the appearance of the snake
 	resp.Headtype = HEADTYPES[rand.Intn(len(HEADTYPES))]
 	resp.Tailtype = TAILTYPES[rand.Intn(len(TAILTYPES))]
+	resp.Color = getRandomHex()
 
 	js, err := json.Marshal(resp)
 	if err != nil {
@@ -49,7 +49,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	url := "https://www.google.com/search?q=snake&source=lnms&tbm=isch"
+	url := "https://www.google.com/search?q=snakes&source=lnms&tbm=isch"
 	http.Redirect(w, r, url, 302)
 }
 

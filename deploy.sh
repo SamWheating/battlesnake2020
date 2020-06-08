@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 
 SERVICE_NAME=battlesnake
 IMAGE=gcr.io/personalsite-264919/battlesnake:latest

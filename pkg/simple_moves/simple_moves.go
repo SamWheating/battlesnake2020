@@ -3,7 +3,6 @@
 package simple_moves
 
 import (
-	"fmt"
 	"github.com/SamWheating/battlesnake2020/pkg/heuristics"
 	"github.com/SamWheating/battlesnake2020/pkg/structs"
 )
@@ -103,7 +102,7 @@ func PlayItSafe(state structs.MoveRequest) string {
 
 func PlayItSafeFlood(state structs.MoveRequest) string {
 	if state.You.Health > 30 {
-		return safestSquareFloodFill(state)
+		return safestSquareFloodFill(state, true)
 	} else {
 		return Greedy(state)
 	}
@@ -172,29 +171,35 @@ func isInBounds(board [][]bool, coord structs.Coordinate) bool {
 
 // Returns the safest of the immediately surrounding squares
 // based on space found with recursive floodfill
-func safestSquareFloodFill(state structs.MoveRequest) string {
+func safestSquareFloodFill(state structs.MoveRequest, safeMode bool) string {
 	current := state.You.Body[0]
 	board := make([][]bool, state.Board.Width)
 	for i := range board {
 		board[i] = make([]bool, state.Board.Height)
 	}
+
 	for _, snake := range state.Board.Snakes {
 		for _, coord := range snake.Body {
 			board[coord.X][coord.Y] = true
 		}
-		// add the spots around the snakes' heads to the no-go zone
-		if snake.ID != state.You.ID {
-			if isInBounds(board, snake.Body[0].Left()) {
-				board[snake.Body[0].Left().X][snake.Body[0].Left().Y] = true
-			}
-			if isInBounds(board, snake.Body[0].Right()) {
-				board[snake.Body[0].Right().X][snake.Body[0].Right().Y] = true
-			}
-			if isInBounds(board, snake.Body[0].Up()) {
-				board[snake.Body[0].Up().X][snake.Body[0].Up().Y] = true
-			}
-			if isInBounds(board, snake.Body[0].Down()) {
-				board[snake.Body[0].Down().X][snake.Body[0].Down().Y] = true
+	}
+
+	if safeMode {
+		for _, snake := range state.Board.Snakes {
+			// add the spots around the snakes' heads to the no-go zone
+			if snake.ID != state.You.ID {
+				if isInBounds(board, snake.Body[0].Left()) {
+					board[snake.Body[0].Left().X][snake.Body[0].Left().Y] = true
+				}
+				if isInBounds(board, snake.Body[0].Right()) {
+					board[snake.Body[0].Right().X][snake.Body[0].Right().Y] = true
+				}
+				if isInBounds(board, snake.Body[0].Up()) {
+					board[snake.Body[0].Up().X][snake.Body[0].Up().Y] = true
+				}
+				if isInBounds(board, snake.Body[0].Down()) {
+					board[snake.Body[0].Down().X][snake.Body[0].Down().Y] = true
+				}
 			}
 		}
 	}
@@ -211,6 +216,9 @@ func safestSquareFloodFill(state structs.MoveRequest) string {
 			move = k
 			best = v
 		}
+	}
+	if best <= 3 && safeMode { // Magic number?
+		return safestSquareFloodFill(state, false)
 	}
 	return move
 }
