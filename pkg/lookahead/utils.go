@@ -1,15 +1,8 @@
 package lookahead
 
-// Utils for a lookahead algorithm
+// func (b structs.Board) NextBoards(move string, depth int) map[string][]structs.Board {
 
-import (
-	"github.com/SamWheating/battlesnake2020/pkg/structs"
-)
+// 	// for(var i = 0; i <= depth; i++){	//
 
-func (b structs.Board) NextBoards(move string, depth int) map[string][]structs.Board {
-
-	for(i := 0; i <= depth; i++){	// 
-
-	}
-}
-
+// 	// }
+// }
