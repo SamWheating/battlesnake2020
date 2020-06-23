@@ -15,7 +15,7 @@ func Hunger(state structs.MoveRequest) int {
 }
 
 // Calculates the total reachable spaces from our snake's head
-// Hueristic function (assigns a score to a hypothetical game state)
+// Heuristic function (assigns a score to a hypothetical game state)
 func HeadRoom(state structs.MoveRequest) int {
 
 	// Initializ a width x height array of false
