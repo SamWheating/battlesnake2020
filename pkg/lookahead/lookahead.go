@@ -17,6 +17,8 @@ func Lookahead(state structs.MoveRequest, depth int, heuristic heuristics.Heuris
 	// 	}
 	// }
 
+	// 4 ryan
+
 	return ""
 }
 
@@ -58,33 +60,49 @@ func NextBoards(state structs.MoveRequest, depth int) <-chan structs.Board {
 // This new combination is passed on to the channel before we call makeMoves once again
 // Return: `moves` (will be passed to the channel and )
 func makeMoves(c chan structs.Board, state structs.MoveRequest, depth int) {
+
 	if depth <= 0 {
 		return
 	}
 
 	moves := []string{"up", "down", "left", "right"}
 	snakes := state.Board.Snakes
-	snakeMoves := make([]map[string]string, 0)
+	snakeMoves := make(map[string]string)
 	for _, snake := range snakes {
-		var snakeMove = make(map[string]string)
 		rand.Seed(time.Now().Unix())
 		move := moves[rand.Intn(len(moves))]
-		snakeMove[snake.ID] = move
+		snakeMoves[snake.ID] = move
 		snakeMoves = append(snakeMoves, snakeMove)
 	}
 
-	newState := applyMovesToState(snakeMoves, state)
-	c <- newState.Board
-	makeMoves(c, newState, depth-1)
+	newBoard := applyMovesToBoard(snakeMoves, state)
+	c <- newBoard
+	makeMoves(c, newBoard, depth-1)
 
 	// 4 ryan
 }
 
 // moves maps the snake ID to the series of moves that it'll make in `state`
-func applyMovesToState(moves []map[string]string, state structs.MoveRequest) structs.MoveRequest {
-	_ = moves
-	state.Turn++
-	return state
+func applyMovesToBoard(moves []map[string]string, board structs.Board) structs.Board {
+
+	// advance snakes by a move and trim the tail if they aren't eating.
+	for _, snake := range board.Snakes {
+		next := snake.Body[0].Move(moves[0][snake.ID])
+		snake.Body = append([]structs.Coordinate{next}, snake.Body...)
+		if !CoordInList(snake.Body[0], board.Food) {
+			snake.Body = snake.Body[:len(snake.Body)-1]
+		}
+	}
+
+	return board
+	// eat food
+	// walls
+	// collisions
+	// return?
+
+	// _ = moves
+	/// state.Turn++
+	///return state
 	// This is confusing because state.Board contains all of the snakes, including you
 	// But the only way you know which one is you is from state.You
 	// So it really needs to be updated in two places. Like you need to apply the move to the board snakes and also You.

@@ -41,6 +41,19 @@ func (c Coordinate) Down() Coordinate {
 	return result
 }
 
+func (c Coordinate) Move(dir string) Coordinate {
+	switch dir {
+	case "left":
+		return c.Left()
+	case "right":
+		return c.Right()
+	case "up":
+		return c.Up()
+	default:
+		return c.Down()
+	}
+}
+
 type MoveResponse struct {
 	Move  string
 	Shout string

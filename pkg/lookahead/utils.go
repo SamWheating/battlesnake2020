@@ -1,8 +1,13 @@
 package lookahead
 
-// func (b structs.Board) NextBoards(move string, depth int) map[string][]structs.Board {
+import "github.com/SamWheating/battlesnake2020/pkg/structs"
 
-// 	// for(var i = 0; i <= depth; i++){	//
-
-// 	// }
-// }
+// check if a coordinate exists in a list
+func CoordInList(c structs.Coordinate, list []structs.Coordinate) bool {
+	for _, coord := range list {
+		if coord == c {
+			return true
+		}
+	}
+	return false
+}
