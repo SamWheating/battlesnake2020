@@ -49,7 +49,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	url := "https://www.google.com/search?q=snakes&source=lnms&tbm=isch"
+	url := "https://www.google.com/search?q=snake&source=lnms&tbm=isch"
 	http.Redirect(w, r, url, 302)
 }
 

@@ -184,9 +184,10 @@ func safestSquareFloodFill(state structs.MoveRequest, safeMode bool) string {
 		}
 	}
 
+	// give other snakes some space by including areas right around their heads as no-go zones
 	if safeMode {
 		for _, snake := range state.Board.Snakes {
-			// add the spots around the snakes' heads to the no-go zone
+			// add the spots around the snakes' heads to the no-go zone (if they're bigger)
 			if snake.ID != state.You.ID {
 				if isInBounds(board, snake.Body[0].Left()) {
 					board[snake.Body[0].Left().X][snake.Body[0].Left().Y] = true
