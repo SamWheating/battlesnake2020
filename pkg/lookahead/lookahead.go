@@ -1,42 +1,23 @@
 package lookahead
 
 import (
-	//"math/rand"
-	//"time"
+	"fmt"
+	"math/rand"
+	"time"
+
 	"github.com/SamWheating/battlesnake2020/pkg/heuristics"
 	"github.com/SamWheating/battlesnake2020/pkg/structs"
 )
 
 func Lookahead(state structs.MoveRequest, depth int, heuristic heuristics.Heuristic) string {
-	// // moves := NextBoards(state, depth)	// all the possible next boards: {left: [board1, board2...], right: []}
-	// scores := make(map[string]int) // {left: 100, right: 80, down: 110}
-	// for _, move := range moves {
-	// 	for board := range moves[move] {
-	// 		scores[move] += heuristic.score(state)
-	// 	}
-	// }
-
-	// 4 ryan
-
-	return ""
-}
-
-// func NextBoards(state structs.MoveRequest, depth int){
-
-// 	calculate all possible permutations
-// 	for permutation:	(in parallel?)
-// 	- advance board(moves)
-// 	return {left: [board1, board2], right: []...} etc
-
-// }
-
-func advanceBoard(state structs.Board, moves map[string]string) {
-
-	// take a gamestate and a mapping of snakes:moves
-	// {state, [snake1: left, snake2: right]
-	// simulate the game for one tick
-	// return the updated gamestate
-
+	// scores = {left: [], right: [], up: [], down: []}
+	// moves = SampleRandomSnakeMoves(board structs.Board, depth int, count int)
+	// for move in moves:
+	//	 board = advanceboard(board, moves)
+	//   boardscore = heuristic.headroom(board)
+	//   scores[move[board.you.ID][0]].append( boardscore)
+	// return max(scores/len(scores))
+	return "left"
 }
 
 // FWIW: https://stackoverflow.com/a/19249957 inspired a lot of what I did here.
@@ -103,6 +84,25 @@ func GetSnakeMoves(board structs.Board, depth int) []map[string][]string {
 	return snakemoves
 }
 
+// SampleRandomSnakeMoves generates <count> possible combinations of <depth> moves for each snake
+func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[string][]string {
+	rand.Seed(time.Now().Unix())
+	snakemoves := make([]map[string][]string, count)
+	directions := []string{"up", "down", "left", "right"}
+	for i := 0; i < count; i++ {
+		scenario := map[string][]string{}
+		for _, snake := range board.Snakes {
+			moves := make([]string, 4)
+			for j := 0; j < depth; j++ {
+				moves[j] = directions[rand.Intn(len(directions))]
+			}
+			scenario[snake.ID] = moves
+		}
+		snakemoves[i] = scenario
+	}
+	return snakemoves
+}
+
 // applyMovesToBoard applies a set of moves to a board, thus advancing the state of the game by one tick.
 // moves maps the snake ID to the series of moves that it'll make in `state`.
 // Note: the spawning of food is not accounted for here.
@@ -112,26 +112,31 @@ func GetSnakeMoves(board structs.Board, depth int) []map[string][]string {
 //   3) Eat food
 //   4) Check for wall collisions + starvations
 //   5) Check for snake-on-snake collisions (TODO)
-func ApplyMovesToBoard(moves map[string]string, board structs.Board) structs.Board {
+func ApplyMovesToBoard(moves map[string][]string, board structs.Board) structs.Board {
 
+	// snake1: [left, right, down]
 	snakes := []structs.Snake{}
 
-	for _, snake := range board.Snakes {
-		next := snake.Body[0].Move(moves[snake.ID])
-		snake.Body = append([]structs.Coordinate{next}, snake.Body...)
-		snake.Health = snake.Health - 1
-		if !CoordInList(snake.Body[0], board.Food) {
-			snake.Body = snake.Body[:len(snake.Body)-1]
-		} else {
-			snake.Health = 100
+	for i := range moves[board.Snakes[0].ID] { // [left, right, down]
+		fmt.Println(board.Snakes)
+		snakes = []structs.Snake{}
+		for j, snake := range board.Snakes {
+			next := snake.Body[0].Move(moves[snake.ID][i])
+			board.Snakes[j].Body = append([]structs.Coordinate{next}, snake.Body...)
+			board.Snakes[j].Health = snake.Health - 1
+			if !CoordInList(snake.Body[0], board.Food) {
+				board.Snakes[j].Body = board.Snakes[j].Body[:len(board.Snakes[j].Body)-1]
+			} else {
+				board.Snakes[j].Health = 100
+			}
+			// only keep snakes which haven't starved or gone out of bounds
+			if !IsOutOfBounds(board, next) && !IsStarved(board.Snakes[j]) {
+				snakes = append(snakes, board.Snakes[j])
+			}
 		}
-		// only keep snakes which haven't starved or gone out of bounds
-		if !IsOutOfBounds(board, next) && !IsStarved(snake) {
-			snakes = append(snakes, snake)
-		}
+		board.Snakes = snakes
 	}
 	// update snakes on the board to exclude dead snakes
-	board.Snakes = snakes
 	return board
 }
 
