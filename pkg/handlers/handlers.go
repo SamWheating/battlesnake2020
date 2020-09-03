@@ -3,10 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/SamWheating/battlesnake2020/pkg/simple_moves"
-	"github.com/SamWheating/battlesnake2020/pkg/structs"
 	"math/rand"
 	"net/http"
+
+	"github.com/SamWheating/battlesnake2020/pkg/lookahead"
+	"github.com/SamWheating/battlesnake2020/pkg/structs"
 )
 
 // return a random 24-bit hex colour like #A1B514
@@ -64,7 +65,8 @@ func Move(w http.ResponseWriter, r *http.Request) {
 
 	// call external move function (swap this out for different algs)
 	//move := simple_moves.PlayItSafe(body)
-	move := simple_moves.PlayItSafeFlood(body)
+	//move := simple_moves.PlayItSafeFlood(body)
+	move := lookahead.Lookahead(body, 1)
 	//move := simple_moves.Greedy(body)
 	//move := simple_moves.FollowTail(body)
 

@@ -17,22 +17,39 @@ func Hunger(state structs.MoveRequest) int {
 // Calculates the total reachable spaces from our snake's head
 // Heuristic function (assigns a score to a hypothetical game state)
 // TODO: operate on Boards instead of the state ex. HeadRoom(board structs.Board, string ID)
-func HeadRoom(state structs.MoveRequest) int {
+func HeadRoom(board structs.Board, you string) int {
+	head_x := -1
+	head_y := -1
+	youSnake := structs.Snake{}
+	for _, snake := range board.Snakes {
+		if snake.ID == you {
+			youSnake = snake
+			head_x = snake.Body[0].X
+			head_y = snake.Body[0].Y
+		}
+	}
+	if head_x == -1 {
+		return -10 // TUNE THIS MAGIC CONSTANT
+	}
+	// if you not in board.snakes
+	//	return -100
+	// head_x = baord.snakes[you].X
+	// head_y = board.snakes[you].Y
 
 	// Initializ a width x height array of false
-	board := make([][]bool, state.Board.Width)
-	for i := range board {
-		board[i] = make([]bool, state.Board.Height)
+	boolboard := make([][]bool, board.Width)
+	for i := range boolboard {
+		boolboard[i] = make([]bool, board.Height)
 	}
 
-	for _, snake := range state.Board.Snakes {
+	for _, snake := range board.Snakes {
 		for _, coord := range snake.Body {
-			board[coord.X][coord.Y] = true
+			boolboard[coord.X][coord.Y] = true
 		}
 	}
 
-	board[state.You.Body[0].X][state.You.Body[0].Y] = false
-	return FloodFill(board, state.You.Body[0])
+	boolboard[head_x][head_y] = false
+	return FloodFill(boolboard, youSnake.Body[0])
 }
 
 func FloodFill(boardState [][]bool, coord structs.Coordinate) int {

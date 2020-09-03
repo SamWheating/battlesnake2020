@@ -9,15 +9,37 @@ import (
 	"github.com/SamWheating/battlesnake2020/pkg/structs"
 )
 
-func Lookahead(state structs.MoveRequest, depth int, heuristic heuristics.Heuristic) string {
-	// scores = {left: [], right: [], up: [], down: []}
-	// moves = SampleRandomSnakeMoves(board structs.Board, depth int, count int)
-	// for move in moves:
-	//	 board = advanceboard(board, moves)
-	//   boardscore = heuristic.headroom(board)
-	//   scores[move[board.you.ID][0]].append( boardscore)
-	// return max(scores/len(scores))
-	return "left"
+func Lookahead(state structs.MoveRequest, depth int) string {
+	directions := []string{"left", "right", "up", "down"}
+	scores := make(map[string][]int)
+	for _, direction := range directions {
+		scores[direction] = []int{}
+	}
+	count := 20 // TUNE THIS MAGIC CONSTANT
+	moves := SampleRandomSnakeMoves(state.Board, depth, count)
+	for _, move := range moves {
+		board := ApplyMovesToBoard(move, state.Board)
+		score := heuristics.HeadRoom(board, state.You.ID)
+		direction := move[state.You.ID][0]
+		scores[direction] = append(scores[direction], score)
+	}
+
+	max := 0.0
+	choice := "left"
+	fmt.Println(moves)
+	fmt.Println(scores)
+	for dir, all_scores := range scores {
+		total := 0
+		for _, score := range all_scores {
+			total += score
+		}
+		dirScore := float64(total) / float64(len(all_scores))
+		if dirScore > max {
+			choice = dir
+			max = dirScore
+		}
+	}
+	return choice
 }
 
 // FWIW: https://stackoverflow.com/a/19249957 inspired a lot of what I did here.
@@ -113,13 +135,17 @@ func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[str
 //   4) Check for wall collisions + starvations
 //   5) Check for snake-on-snake collisions (TODO)
 func ApplyMovesToBoard(moves map[string][]string, board structs.Board) structs.Board {
-
 	// snake1: [left, right, down]
-	snakes := []structs.Snake{}
+	// TODO!!!! Make a local copy of the board so we don't corrupt the original object
+
+	newBoard := *new(structs.Board)
+	newBoard.Height = board.Height
+	newBoard.Width = board.Width
+	newBoard.Snakes = []structs.Snake{}
+	newBoard.Food = []structs.Coordinate{}
 
 	for i := range moves[board.Snakes[0].ID] { // [left, right, down]
-		fmt.Println(board.Snakes)
-		snakes = []structs.Snake{}
+		snakes := []structs.Snake{}
 		for j, snake := range board.Snakes {
 			next := snake.Body[0].Move(moves[snake.ID][i])
 			board.Snakes[j].Body = append([]structs.Coordinate{next}, snake.Body...)
@@ -130,14 +156,27 @@ func ApplyMovesToBoard(moves map[string][]string, board structs.Board) structs.B
 				board.Snakes[j].Health = 100
 			}
 			// only keep snakes which haven't starved or gone out of bounds
-			if !IsOutOfBounds(board, next) && !IsStarved(board.Snakes[j]) {
+			if !IsOutOfBounds(board, next) && !IsStarved(board.Snakes[j]) && !HitOtherSnake(board, next) {
 				snakes = append(snakes, board.Snakes[j])
 			}
 		}
-		board.Snakes = snakes
+		newBoard.Snakes = snakes
 	}
 	// update snakes on the board to exclude dead snakes
-	return board
+	return newBoard
+}
+
+// TODO: include logic of snake on snake collisions w.r.t size
+func HitOtherSnake(board structs.Board, head structs.Coordinate) bool {
+	count := 0
+	for _, snake := range board.Snakes {
+		for _, coord := range snake.Body {
+			if coord.X == head.X && coord.Y == head.Y {
+				count += 1
+			}
+		}
+	}
+	return count > 1
 }
 
 func IsOutOfBounds(board structs.Board, head structs.Coordinate) bool {
