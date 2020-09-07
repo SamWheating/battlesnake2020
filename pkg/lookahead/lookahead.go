@@ -2,20 +2,19 @@ package lookahead
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
-
 	"github.com/SamWheating/battlesnake2020/pkg/heuristics"
 	"github.com/SamWheating/battlesnake2020/pkg/structs"
+	"github.com/getlantern/deepcopy"
+	"math/rand"
+	"time"
 )
 
-func Lookahead(state structs.MoveRequest, depth int) string {
+func Lookahead(state structs.MoveRequest, depth int, count int) string {
 	directions := []string{"left", "right", "up", "down"}
 	scores := make(map[string][]int)
 	for _, direction := range directions {
 		scores[direction] = []int{}
 	}
-	count := 20 // TUNE THIS MAGIC CONSTANT
 	moves := SampleRandomSnakeMoves(state.Board, depth, count)
 	for _, move := range moves {
 		board := ApplyMovesToBoard(move, state.Board)
@@ -24,10 +23,9 @@ func Lookahead(state structs.MoveRequest, depth int) string {
 		scores[direction] = append(scores[direction], score)
 	}
 
-	max := 0.0
+	fmt.Println("\n\n")
+	max := -500.0
 	choice := "left"
-	fmt.Println(moves)
-	fmt.Println(scores)
 	for dir, all_scores := range scores {
 		total := 0
 		for _, score := range all_scores {
@@ -38,7 +36,9 @@ func Lookahead(state structs.MoveRequest, depth int) string {
 			choice = dir
 			max = dirScore
 		}
+		fmt.Println(dir, dirScore)
 	}
+	fmt.Printf("go %s\n", choice)
 	return choice
 }
 
@@ -114,7 +114,7 @@ func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[str
 	for i := 0; i < count; i++ {
 		scenario := map[string][]string{}
 		for _, snake := range board.Snakes {
-			moves := make([]string, 4)
+			moves := make([]string, depth)
 			for j := 0; j < depth; j++ {
 				moves[j] = directions[rand.Intn(len(directions))]
 			}
@@ -137,27 +137,27 @@ func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[str
 func ApplyMovesToBoard(moves map[string][]string, board structs.Board) structs.Board {
 	// snake1: [left, right, down]
 	// TODO!!!! Make a local copy of the board so we don't corrupt the original object
+	boardBoard := new(structs.Board)
+	err := deepcopy.Copy(boardBoard, &board)
+	if err != nil {
+		fmt.Println(err)
+	}
+	newBoard := *boardBoard
 
-	newBoard := *new(structs.Board)
-	newBoard.Height = board.Height
-	newBoard.Width = board.Width
-	newBoard.Snakes = []structs.Snake{}
-	newBoard.Food = []structs.Coordinate{}
-
-	for i := range moves[board.Snakes[0].ID] { // [left, right, down]
+	for i := range moves[newBoard.Snakes[0].ID] { // [left, right, down]
 		snakes := []structs.Snake{}
-		for j, snake := range board.Snakes {
+		for j, snake := range newBoard.Snakes {
 			next := snake.Body[0].Move(moves[snake.ID][i])
-			board.Snakes[j].Body = append([]structs.Coordinate{next}, snake.Body...)
-			board.Snakes[j].Health = snake.Health - 1
-			if !CoordInList(snake.Body[0], board.Food) {
-				board.Snakes[j].Body = board.Snakes[j].Body[:len(board.Snakes[j].Body)-1]
+			newBoard.Snakes[j].Body = append([]structs.Coordinate{next}, snake.Body...)
+			newBoard.Snakes[j].Health = snake.Health - 1
+			if !CoordInList(snake.Body[0], newBoard.Food) {
+				newBoard.Snakes[j].Body = newBoard.Snakes[j].Body[:len(newBoard.Snakes[j].Body)-1]
 			} else {
-				board.Snakes[j].Health = 100
+				newBoard.Snakes[j].Health = 100
 			}
 			// only keep snakes which haven't starved or gone out of bounds
-			if !IsOutOfBounds(board, next) && !IsStarved(board.Snakes[j]) && !HitOtherSnake(board, next) {
-				snakes = append(snakes, board.Snakes[j])
+			if !IsOutOfBounds(newBoard, next) && !IsStarved(newBoard.Snakes[j]) && !HitOtherSnake(newBoard, next) {
+				snakes = append(snakes, newBoard.Snakes[j])
 			}
 		}
 		newBoard.Snakes = snakes
@@ -190,7 +190,7 @@ func IsOutOfBounds(board structs.Board, head structs.Coordinate) bool {
 }
 
 func IsStarved(snake structs.Snake) bool {
-	if snake.Health <= 0 {
+	if snake.Health <= 10 { // Todo: this is a cheap hack for avoiding complete starvation
 		return true
 	}
 	return false

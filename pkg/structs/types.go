@@ -14,7 +14,6 @@ func (c Coordinate) Left() Coordinate {
 	return result
 }
 
-// Left goes left
 func (c Coordinate) Right() Coordinate {
 	result := Coordinate{
 		X: c.X + 1,
@@ -23,7 +22,6 @@ func (c Coordinate) Right() Coordinate {
 	return result
 }
 
-// Left goes left
 func (c Coordinate) Up() Coordinate {
 	result := Coordinate{
 		X: c.X,
@@ -32,7 +30,6 @@ func (c Coordinate) Up() Coordinate {
 	return result
 }
 
-// Left goes left
 func (c Coordinate) Down() Coordinate {
 	result := Coordinate{
 		X: c.X,

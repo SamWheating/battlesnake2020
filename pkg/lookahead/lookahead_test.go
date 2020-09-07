@@ -306,20 +306,6 @@ func TestGetSnakeMoves(t *testing.T) {
 	}
 }
 
-// func TestGetSnakeMovesDepthTwo(t *testing.T) {
-// 	board := structs.Board{
-// 		Snakes: []structs.Snake{
-// 			structs.Snake{
-// 				ID: "snake1",
-// 			},
-// 		},
-// 	}
-// 	moves := lookahead.GetSnakeMoves(board, 2)
-// 	if len(moves) != 16 {
-// 		t.Errorf("Should have generated 16 scenarios, generated %d", len(moves))
-// 	}
-// }
-
 func TestSampleRandomSnakeMoves(t *testing.T) {
 	board := structs.Board{
 		Snakes: []structs.Snake{
@@ -337,5 +323,30 @@ func TestSampleRandomSnakeMoves(t *testing.T) {
 	}
 	if len(moves[0]["snake1"]) != 4 {
 		t.Errorf("Should have generated 4 moves per snake-scenario, generated %d", len(moves))
+	}
+}
+
+func TestApplyMovesToBoard(t *testing.T) {
+	board := structs.Board{
+		Height: 15,
+		Width:  15,
+		Food:   []structs.Coordinate{},
+		Snakes: []structs.Snake{
+			structs.Snake{
+				ID:     "guy",
+				Health: 100,
+				Body: []structs.Coordinate{
+					structs.Coordinate{X: 0, Y: 11},
+					structs.Coordinate{X: 1, Y: 11},
+					structs.Coordinate{X: 2, Y: 11},
+				},
+			},
+		},
+	}
+	moves := map[string][]string{}
+	moves["guy"] = []string{"down"}
+	nextBoard := lookahead.ApplyMovesToBoard(moves, board)
+	if len(nextBoard.Snakes) == 0 {
+		t.Errorf("Should be one snake remaining, have %d", len(nextBoard.Snakes))
 	}
 }

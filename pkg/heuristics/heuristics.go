@@ -28,6 +28,7 @@ func HeadRoom(board structs.Board, you string) int {
 			head_y = snake.Body[0].Y
 		}
 	}
+	// penalize the snake for dying in this turn
 	if head_x == -1 {
 		return -10 // TUNE THIS MAGIC CONSTANT
 	}

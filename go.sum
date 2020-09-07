@@ -1,3 +1,7 @@
 github.com/RyanBrushett/battlesnake2020 v0.0.0-20200331172245-3e813bc895d2 h1:U36+rVdqA1jD2Ck2wcfsPwYaxj1G6JiB4L/qG+fF7SM=
 github.com/RyanBrushett/battlesnake2020 v0.0.0-20200331172245-3e813bc895d2/go.mod h1:ziabc5NmLl3koeoZuyUvZ9PPQkKh8RUTGNPSPYZupWQ=
+github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
+github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/getlantern/deepcopy v0.0.0-20160317154340-7f45deb8130a h1:yU/FENpkHYISWsQrbr3pcZOBj0EuRjPzNc1+dTCLu44=
+github.com/getlantern/deepcopy v0.0.0-20160317154340-7f45deb8130a/go.mod h1:AEugkNu3BjBxyz958nJ5holD9PRjta6iprcoUauDbU4=
 github.com/samwheating/battlesnake2020 v0.0.0-20200330005350-ea4e5ff01750 h1:iA2t2LCHzfTRTPqNdjbsnLB3mQs1sAhXS9DPtgQ4nwM=
