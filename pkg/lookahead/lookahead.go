@@ -23,7 +23,7 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 		scores[direction] = append(scores[direction], score)
 	}
 
-	fmt.Println("\n\n")
+	fmt.Println("\n")
 	max := -500.0
 	choice := "left"
 	for dir, all_scores := range scores {

@@ -7,6 +7,7 @@ import (
 	"github.com/SamWheating/battlesnake2020/pkg/structs"
 	"math/rand"
 	"net/http"
+	"strconv"
 )
 
 // return a random 24-bit hex colour like #A1B514
@@ -62,10 +63,21 @@ func Move(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	depthArg := r.URL.Query().Get("depth")
+	countArg := r.URL.Query().Get("count")
+	if depthArg == "" {
+		depthArg = "10"
+	}
+	if countArg == "" {
+		countArg = "5000"
+	}
+	depth, _ := strconv.Atoi(depthArg)
+	count, _ := strconv.Atoi(countArg)
+
 	// call external move function (swap this out for different algs)
 	//move := simple_moves.PlayItSafe(body)
 	//move := simple_moves.PlayItSafeFlood(body)
-	move := lookahead.Lookahead(body, 10, 5000)
+	move := lookahead.Lookahead(body, depth, count)
 	//move := simple_moves.Greedy(body)
 	//move := simple_moves.FollowTail(body)
 
