@@ -42,48 +42,6 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 	return choice
 }
 
-// FWIW: https://stackoverflow.com/a/19249957 inspired a lot of what I did here.
-
-// NextBoards returns some boards.
-func NextBoards(state structs.MoveRequest, depth int) <-chan structs.Board {
-	c := make(chan structs.Board)
-
-	// Starting a separate goroutine that will create all the combinations,
-	// feeding them to the channel c
-	go func(c chan structs.Board) {
-		defer close(c) // Once the iteration function is finished, we close the channel
-
-		makeMoves(c, state, depth) // We start by feeding it the current state of the game and a depth
-	}(c)
-
-	return c // Return the channel to the calling function
-}
-
-// This new combination is passed on to the channel before we call makeMoves once again
-// Return: `moves` (will be passed to the channel and )
-func makeMoves(c chan structs.Board, state structs.MoveRequest, depth int) {
-
-	// if depth <= 0 {
-	// 	return
-	// }
-
-	// moves := []string{"up", "down", "left", "right"}
-	// snakes := state.Board.Snakes
-	// snakeMoves := make(map[string]string)
-	// for _, snake := range snakes {
-	// 	rand.Seed(time.Now().Unix())
-	// 	move := moves[rand.Intn(len(moves))]
-	// 	snakeMoves[snake.ID] = move
-	// 	snakeMoves = append(snakeMoves, snakeMove)
-	// }
-
-	// newBoard := applyMovesToBoard(snakeMoves, state)
-	// c <- newBoard
-	// makeMoves(c, newBoard, depth-1)
-
-	// 4 ryan
-}
-
 // getSnakeMoves generates a tree of all possible combinations of moves for each snake
 // depth specifies the number of moves in the future.
 // I think this is referred to as a triple cartesian product
@@ -133,10 +91,8 @@ func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[str
 //   2) Subtract hunger
 //   3) Eat food
 //   4) Check for wall collisions + starvations
-//   5) Check for snake-on-snake collisions (TODO)
 func ApplyMovesToBoard(moves map[string][]string, board structs.Board) structs.Board {
 	// snake1: [left, right, down]
-	// TODO!!!! Make a local copy of the board so we don't corrupt the original object
 	boardBoard := new(structs.Board)
 	err := deepcopy.Copy(boardBoard, &board)
 	if err != nil {
