@@ -66,10 +66,10 @@ func Move(w http.ResponseWriter, r *http.Request) {
 	depthArg := r.URL.Query().Get("depth")
 	countArg := r.URL.Query().Get("count")
 	if depthArg == "" {
-		depthArg = "10"
+		depthArg = "5"
 	}
 	if countArg == "" {
-		countArg = "5000"
+		countArg = "2000"
 	}
 	depth, _ := strconv.Atoi(depthArg)
 	count, _ := strconv.Atoi(countArg)

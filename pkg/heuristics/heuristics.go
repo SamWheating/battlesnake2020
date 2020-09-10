@@ -45,7 +45,13 @@ func HeadRoom(board structs.Board, you string) int {
 	}
 
 	boolboard[head_x][head_y] = false
-	return FloodFill(boolboard, youSnake.Body[0])
+	score := FloodFill(boolboard, youSnake.Body[0])
+
+	if youSnake.Health < 40 {
+		score -= 4 * (40 - youSnake.Health)
+	}
+
+	return score
 }
 
 func FloodFill(boardState [][]bool, coord structs.Coordinate) int {

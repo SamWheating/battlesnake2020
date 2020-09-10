@@ -24,8 +24,8 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 	}
 
 	fmt.Println("\n")
-	max := -500.0
-	choice := "left"
+	max := -10.0
+	choice := directions[rand.Int()%4] // a random default direction
 	for dir, all_scores := range scores {
 		total := 0
 		for _, score := range all_scores {
@@ -146,7 +146,7 @@ func IsOutOfBounds(board structs.Board, head structs.Coordinate) bool {
 }
 
 func IsStarved(snake structs.Snake) bool {
-	if snake.Health <= 10 { // Todo: this is a cheap hack for avoiding complete starvation
+	if snake.Health <= 0 { // Todo: this is a cheap hack for avoiding complete starvation
 		return true
 	}
 	return false

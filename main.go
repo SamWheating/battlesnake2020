@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/SamWheating/battlesnake2020/pkg/handlers"
 	"fmt"
+	"github.com/SamWheating/battlesnake2020/pkg/handlers"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 )
 
