@@ -17,8 +17,9 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 	}
 	moves := SampleRandomSnakeMoves(state.Board, depth, count)
 	for _, move := range moves {
-		board := ApplyMovesToBoard(move, state.Board)
-		score := heuristics.HeadRoom(board, state.You.ID)
+		//board := ApplyMovesToBoard(move, state.Board)
+		//score := heuristics.HeadRoom(board, state.You.ID)
+		score := scoreScenario(move, state, depth)
 		direction := move[state.You.ID][0]
 		scores[direction] = append(scores[direction], score)
 	}
@@ -144,4 +145,44 @@ func IsStarved(snake structs.Snake) bool {
 		return true
 	}
 	return false
+}
+
+func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth int) int {
+	// snake1: [left, right, down]
+	newBoard := state.Board.Clone()
+
+	for i := 0; i < depth; i++ { // [left, right, down]
+		snakes := []structs.Snake{}
+		for j, snake := range newBoard.Snakes {
+			next := snake.Body[0].Move(moves[snake.ID][i])
+			newBoard.Snakes[j].Body = append([]structs.Coordinate{next}, snake.Body...)
+			newBoard.Snakes[j].Health = snake.Health - 1
+			if !CoordInList(snake.Body[0], newBoard.Food) {
+				newBoard.Snakes[j].Body = newBoard.Snakes[j].Body[:len(newBoard.Snakes[j].Body)-1]
+			} else {
+				newBoard.Snakes[j].Health = 100
+			}
+			// only keep snakes which haven't starved or gone out of bounds
+			if !IsOutOfBounds(newBoard, next) && !IsStarved(newBoard.Snakes[j]) && !HitOtherSnake(newBoard, next) {
+				snakes = append(snakes, newBoard.Snakes[j])
+			}
+		}
+		// update snakes on the board to exclude dead snakes
+		newBoard.Snakes = snakes
+
+		// if we're dead by now, return score weighted by i
+		alive := false
+		for _, snake := range snakes {
+			if snake.ID == state.You.ID {
+				alive = true
+				break
+			}
+		}
+		if !alive {
+			return -1 * (depth - i) // TODO: improve this
+		}
+	}
+	// if we made it all n turns, return the heuristic
+	return heuristics.HeadRoom(newBoard, state.You.ID)
+
 }
