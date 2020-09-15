@@ -43,28 +43,6 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 	return choice
 }
 
-// getSnakeMoves generates a tree of all possible combinations of moves for each snake
-// depth specifies the number of moves in the future.
-// I think this is referred to as a triple cartesian product
-// return will look like:
-// [
-//	{snake1: ["left", "left"], "snake2": ["left", "left"]},
-//  {snake1: ["left", "down"], "snake2": ["left", "left"]}
-// ]
-// With all possible combinations of moves. The size of return will be 4^<num snakes>^<depth>
-func GetSnakeMoves(board structs.Board, depth int) []map[string][]string {
-	snakemoves := []map[string][]string{}
-	directions := []string{"up", "down", "left", "right"}
-	for i := 0; i < depth; i++ {
-		for _, snake := range board.Snakes {
-			for _, direction := range directions {
-				snakemoves = append(snakemoves, map[string][]string{snake.ID: []string{direction}})
-			}
-		}
-	}
-	return snakemoves
-}
-
 // SampleRandomSnakeMoves generates <count> possible combinations of <depth> moves for each snake
 func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[string][]string {
 	rand.Seed(time.Now().Unix())
@@ -75,13 +53,36 @@ func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[str
 		for _, snake := range board.Snakes {
 			moves := make([]string, depth)
 			for j := 0; j < depth; j++ {
-				moves[j] = directions[rand.Intn(len(directions))]
+				var direction string
+				for {
+					direction = directions[rand.Intn(len(directions))]
+					if j == 0 {
+						break
+					} else if !IsOpposite(direction, moves[j-1]) {
+						break
+					}
+				}
+				moves[j] = direction
 			}
 			scenario[snake.ID] = moves
 		}
 		snakemoves[i] = scenario
 	}
 	return snakemoves
+}
+
+func IsOpposite(move1 string, move2 string) bool {
+	switch move1 {
+	case "left":
+		return move2 == "right"
+	case "right":
+		return move2 == "left"
+	case "up":
+		return move2 == "down"
+	case "down":
+		return move2 == "up"
+	}
+	return false
 }
 
 // applyMovesToBoard applies a set of moves to a board, thus advancing the state of the game by one tick.

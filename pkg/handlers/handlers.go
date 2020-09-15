@@ -3,11 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/SamWheating/battlesnake2020/pkg/lookahead"
-	"github.com/SamWheating/battlesnake2020/pkg/structs"
 	"math/rand"
 	"net/http"
 	"strconv"
+
+	"github.com/SamWheating/battlesnake2020/pkg/lookahead"
+	"github.com/SamWheating/battlesnake2020/pkg/structs"
 )
 
 // return a random 24-bit hex colour like #A1B514
@@ -66,10 +67,10 @@ func Move(w http.ResponseWriter, r *http.Request) {
 	depthArg := r.URL.Query().Get("depth")
 	countArg := r.URL.Query().Get("count")
 	if depthArg == "" {
-		depthArg = "5"
+		depthArg = "10"
 	}
 	if countArg == "" {
-		countArg = "2000"
+		countArg = "10000"
 	}
 	depth, _ := strconv.Atoi(depthArg)
 	count, _ := strconv.Atoi(countArg)
