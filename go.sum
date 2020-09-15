@@ -5,3 +5,5 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/getlantern/deepcopy v0.0.0-20160317154340-7f45deb8130a h1:yU/FENpkHYISWsQrbr3pcZOBj0EuRjPzNc1+dTCLu44=
 github.com/getlantern/deepcopy v0.0.0-20160317154340-7f45deb8130a/go.mod h1:AEugkNu3BjBxyz958nJ5holD9PRjta6iprcoUauDbU4=
 github.com/samwheating/battlesnake2020 v0.0.0-20200330005350-ea4e5ff01750 h1:iA2t2LCHzfTRTPqNdjbsnLB3mQs1sAhXS9DPtgQ4nwM=
+gopkg.in/eapache/go-resiliency.v1 v1.2.0 h1:Ga62yQGVh5jQ/k6rDYhn2UsV9evgp2ZmMwXgGu2YcOQ=
+gopkg.in/eapache/go-resiliency.v1 v1.2.0/go.mod h1:ufQ2tre3XZoQT9X8nKYgTaqO8DrIudC5V1EOYUwIka0=
