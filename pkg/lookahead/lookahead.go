@@ -2,11 +2,11 @@ package lookahead
 
 import (
 	"fmt"
-	"github.com/SamWheating/battlesnake2020/pkg/heuristics"
-	"github.com/SamWheating/battlesnake2020/pkg/structs"
-	"github.com/getlantern/deepcopy"
 	"math/rand"
 	"time"
+
+	"github.com/SamWheating/battlesnake2020/pkg/heuristics"
+	"github.com/SamWheating/battlesnake2020/pkg/structs"
 )
 
 func Lookahead(state structs.MoveRequest, depth int, count int) string {
@@ -92,13 +92,7 @@ func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[str
 //   3) Eat food
 //   4) Check for wall collisions + starvations
 func ApplyMovesToBoard(moves map[string][]string, board structs.Board) structs.Board {
-	// snake1: [left, right, down]
-	boardBoard := new(structs.Board)
-	err := deepcopy.Copy(boardBoard, &board)
-	if err != nil {
-		fmt.Println(err)
-	}
-	newBoard := *boardBoard
+	newBoard := board.Clone()
 
 	for i := range moves[newBoard.Snakes[0].ID] { // [left, right, down]
 		snakes := []structs.Snake{}

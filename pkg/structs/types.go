@@ -51,6 +51,14 @@ func (c Coordinate) Move(dir string) Coordinate {
 	}
 }
 
+func (c Coordinate) Clone() Coordinate {
+	result := Coordinate{
+		X: c.X,
+		Y: c.Y,
+	}
+	return result
+}
+
 type MoveResponse struct {
 	Move  string
 	Shout string
@@ -87,12 +95,47 @@ type Board struct {
 	Snakes []Snake      `json:"snakes"`
 }
 
+func (b Board) Clone() Board {
+	result := Board{
+		Height: b.Height,
+		Width:  b.Width,
+		Food:   []Coordinate{},
+		Snakes: []Snake{},
+	}
+
+	for _, coord := range b.Food {
+		result.Food = append(result.Food, coord.Clone())
+	}
+
+	for _, snake := range b.Snakes {
+		result.Snakes = append(result.Snakes, snake.Clone())
+	}
+
+	return result
+}
+
 type Snake struct {
 	ID     string       `json:"id"`
 	Name   string       `json:"name"`
 	Health int          `json:"health"`
 	Body   []Coordinate `json:"body"`
 	Shout  string       `json:"shout"`
+}
+
+func (s Snake) Clone() Snake {
+	result := Snake{
+		ID:     s.ID,
+		Name:   s.Name,
+		Health: s.Health,
+		Body:   []Coordinate{},
+		Shout:  s.Shout,
+	}
+
+	for _, coord := range s.Body {
+		result.Body = append(result.Body, coord.Clone())
+	}
+
+	return result
 }
 
 // This is the request structure from the gameserver -
