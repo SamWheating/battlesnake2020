@@ -3,6 +3,7 @@ package lookahead
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/SamWheating/battlesnake2020/pkg/heuristics"
@@ -16,13 +17,22 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 		scores[direction] = []int{}
 	}
 	moves := SampleRandomSnakeMoves(state.Board, depth, count)
+	// create a channel for results
+	// create a waitgroup
+	results := make(map[string](chan int))
+	wg := sync.WaitGroup{}
+	results["left"] = make(chan int)
+	results["right"] = make(chan int)
+	results["up"] = make(chan int)
+	results["down"] = make(chan int)
 	for _, move := range moves {
-		//board := ApplyMovesToBoard(move, state.Board)
-		//score := heuristics.HeadRoom(board, state.You.ID)
-		score := scoreScenario(move, state, depth)
-		direction := move[state.You.ID][0]
-		scores[direction] = append(scores[direction], score)
+		//score := scoreScenario(move, state, depth, channel) // adds (score, direction)
+		scoreScenario(move, state, depth, wg, results)
 	}
+	// close channel
+	// for direction, score in channel
+	for 
+	scores[direction] = append(scores[direction], score)
 
 	fmt.Println("\n")
 	max := -10.0
@@ -148,10 +158,11 @@ func IsStarved(snake structs.Snake) bool {
 	return false
 }
 
-func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth int) int {
+func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth int, wg sync.WaitGroup, results map[string](chan int)) {
 	// snake1: [left, right, down]
 	newBoard := state.Board.Clone()
-
+	direction := moves[state.You.ID][0]
+	defer wg.Done()
 	for i := 0; i < depth; i++ { // [left, right, down]
 		snakes := []structs.Snake{}
 		for j, snake := range newBoard.Snakes {
@@ -180,10 +191,9 @@ func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth i
 			}
 		}
 		if !alive {
-			return -1 * (depth - i) // TODO: improve this
+			results[direction] <- -1 * (depth - i)
 		}
 	}
 	// if we made it all n turns, return the heuristic
-	return heuristics.HeadRoom(newBoard, state.You.ID)
-
+	results[direction] <- heuristics.HeadRoom(newBoard, state.You.ID)
 }
