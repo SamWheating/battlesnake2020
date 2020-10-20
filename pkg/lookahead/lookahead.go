@@ -20,34 +20,34 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 	// create a channel for results
 	// create a waitgroup
 	results := make(map[string](chan int))
-	wg := sync.WaitGroup{}
+	var wg sync.WaitGroup
 	results["left"] = make(chan int)
 	results["right"] = make(chan int)
 	results["up"] = make(chan int)
 	results["down"] = make(chan int)
 	for _, move := range moves {
 		//score := scoreScenario(move, state, depth, channel) // adds (score, direction)
-		scoreScenario(move, state, depth, wg, results)
+		fmt.Println("dispatch")
+		wg.Add(1)
+		go scoreScenario(move, state, depth, &wg, results)
 	}
-	// close channel
-	// for direction, score in channel
-	for 
-	scores[direction] = append(scores[direction], score)
-
-	fmt.Println("\n")
-	max := -10.0
+	wg.Wait()
+	fmt.Println("made it here")
+	max := -10000.0
 	choice := directions[rand.Int()%4] // a random default direction
-	for dir, all_scores := range scores {
+	for _, direction := range directions {
+		count := len(results[direction])
 		total := 0
-		for _, score := range all_scores {
-			total += score
+		for i := range results[direction] {
+			total += i
 		}
-		dirScore := float64(total) / float64(len(all_scores))
+		//scores[direction] = total / count
+		dirScore := float64(total) / float64(count)
 		if dirScore > max {
-			choice = dir
+			choice = direction
 			max = dirScore
 		}
-		fmt.Println(dir, dirScore)
+		fmt.Println(direction, dirScore)
 	}
 	fmt.Printf("go %s\n", choice)
 	return choice
@@ -158,7 +158,7 @@ func IsStarved(snake structs.Snake) bool {
 	return false
 }
 
-func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth int, wg sync.WaitGroup, results map[string](chan int)) {
+func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth int, wg *sync.WaitGroup, results map[string](chan int)) {
 	// snake1: [left, right, down]
 	newBoard := state.Board.Clone()
 	direction := moves[state.You.ID][0]
@@ -192,8 +192,12 @@ func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth i
 		}
 		if !alive {
 			results[direction] <- -1 * (depth - i)
+			fmt.Println("done1")
+			return
 		}
 	}
 	// if we made it all n turns, return the heuristic
+	fmt.Println("done2")
 	results[direction] <- heuristics.HeadRoom(newBoard, state.You.ID)
+	return
 }
