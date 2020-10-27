@@ -159,16 +159,6 @@ func copy2d(source [][]bool) [][]bool {
 	return dest
 }
 
-func isInBounds(board [][]bool, coord structs.Coordinate) bool {
-	if coord.X < 0 || coord.Y < 0 {
-		return false
-	}
-	if coord.X >= len(board) || coord.Y >= len(board[0]) {
-		return false
-	}
-	return true
-}
-
 // Returns the safest of the immediately surrounding squares
 // based on space found with recursive floodfill
 func safestSquareFloodFill(state structs.MoveRequest, safeMode bool) string {
@@ -189,16 +179,16 @@ func safestSquareFloodFill(state structs.MoveRequest, safeMode bool) string {
 		for _, snake := range state.Board.Snakes {
 			// add the spots around the snakes' heads to the no-go zone (if they're bigger)
 			if snake.ID != state.You.ID {
-				if isInBounds(board, snake.Body[0].Left()) {
+				if heuristics.IsInBounds(board, snake.Body[0].Left()) {
 					board[snake.Body[0].Left().X][snake.Body[0].Left().Y] = true
 				}
-				if isInBounds(board, snake.Body[0].Right()) {
+				if heuristics.IsInBounds(board, snake.Body[0].Right()) {
 					board[snake.Body[0].Right().X][snake.Body[0].Right().Y] = true
 				}
-				if isInBounds(board, snake.Body[0].Up()) {
+				if heuristics.IsInBounds(board, snake.Body[0].Up()) {
 					board[snake.Body[0].Up().X][snake.Body[0].Up().Y] = true
 				}
-				if isInBounds(board, snake.Body[0].Down()) {
+				if heuristics.IsInBounds(board, snake.Body[0].Down()) {
 					board[snake.Body[0].Down().X][snake.Body[0].Down().Y] = true
 				}
 			}

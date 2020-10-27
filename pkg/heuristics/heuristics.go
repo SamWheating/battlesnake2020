@@ -41,6 +41,21 @@ func HeadRoom(board structs.Board, you string) int {
 	for _, snake := range board.Snakes {
 		for _, coord := range snake.Body {
 			boolboard[coord.X][coord.Y] = true
+			if snake.ID != you {
+				head := snake.Body[0]
+				if IsInBounds(boolboard, head.Up()) {
+					boolboard[head.Up().X][head.Up().Y] = true
+				}
+				if IsInBounds(boolboard, head.Left()) {
+					boolboard[head.Left().X][head.Left().Y] = true
+				}
+				if IsInBounds(boolboard, head.Right()) {
+					boolboard[head.Right().X][head.Right().Y] = true
+				}
+				if IsInBounds(boolboard, head.Down()) {
+					boolboard[head.Down().X][head.Down().Y] = true
+				}
+			}
 		}
 	}
 
@@ -48,7 +63,7 @@ func HeadRoom(board structs.Board, you string) int {
 	score := FloodFill(boolboard, youSnake.Body[0])
 
 	if youSnake.Health < 40 {
-		score -= 4 * (40 - youSnake.Health)
+		score -= 10 * (40 - youSnake.Health)
 	}
 
 	return score
@@ -93,4 +108,14 @@ func FloodFill(boardState [][]bool, coord structs.Coordinate) int {
 	count += FloodFill(boardState, coord.Up())
 	count += FloodFill(boardState, coord.Down())
 	return count
+}
+
+func IsInBounds(board [][]bool, coord structs.Coordinate) bool {
+	if coord.X < 0 || coord.Y < 0 {
+		return false
+	}
+	if coord.X >= len(board) || coord.Y >= len(board[0]) {
+		return false
+	}
+	return true
 }
