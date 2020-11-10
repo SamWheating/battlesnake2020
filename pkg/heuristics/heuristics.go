@@ -17,20 +17,12 @@ func Hunger(state structs.MoveRequest) int {
 // Calculates the total reachable spaces from our snake's head
 // Heuristic function (assigns a score to a hypothetical game state)
 func HeadRoom(board structs.Board, you string) int {
-	head_x := -1
-	//head_y := -1
+
 	youSnake := structs.Snake{}
 	for _, snake := range board.Snakes {
 		if snake.ID == you {
 			youSnake = snake
-			head_x = snake.Body[0].X
-			//head_y = snake.Body[0].Y
 		}
-	}
-	// penalize the snake for dying in this turn
-	if head_x == -1 {
-		return -5 // TUNE THIS MAGIC CONSTANT
-		panic("got here")
 	}
 
 	// Initialize a width x height array of false
