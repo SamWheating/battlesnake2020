@@ -18,18 +18,19 @@ func Hunger(state structs.MoveRequest) int {
 // Heuristic function (assigns a score to a hypothetical game state)
 func HeadRoom(board structs.Board, you string) int {
 	head_x := -1
-	head_y := -1
+	//head_y := -1
 	youSnake := structs.Snake{}
 	for _, snake := range board.Snakes {
 		if snake.ID == you {
 			youSnake = snake
 			head_x = snake.Body[0].X
-			head_y = snake.Body[0].Y
+			//head_y = snake.Body[0].Y
 		}
 	}
 	// penalize the snake for dying in this turn
 	if head_x == -1 {
-		return -10 // TUNE THIS MAGIC CONSTANT
+		return -5 // TUNE THIS MAGIC CONSTANT
+		panic("got here")
 	}
 
 	// Initialize a width x height array of false
@@ -39,8 +40,10 @@ func HeadRoom(board structs.Board, you string) int {
 	}
 
 	for _, snake := range board.Snakes {
-		for _, coord := range snake.Body {
-			boolboard[coord.X][coord.Y] = true
+		for i, coord := range snake.Body {
+			if !(snake.ID == you && i == 0) {
+				boolboard[coord.X][coord.Y] = true
+			}
 			if snake.ID != you {
 				head := snake.Body[0]
 				if IsInBounds(boolboard, head.Up()) {
@@ -59,7 +62,7 @@ func HeadRoom(board structs.Board, you string) int {
 		}
 	}
 
-	boolboard[head_x][head_y] = false
+	//boolboard[head_x][head_y] = false
 	score := FloodFill(boolboard, youSnake.Body[0])
 
 	if youSnake.Health < 40 {

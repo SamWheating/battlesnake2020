@@ -197,6 +197,10 @@ func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth i
 			}
 		}
 		if !alive {
+			if i == 0 {
+				results[direction] <- -100
+				return
+			}
 			results[direction] <- -1 * (depth - i)
 			return
 		}
