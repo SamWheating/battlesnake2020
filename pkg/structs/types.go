@@ -25,7 +25,7 @@ func (c Coordinate) Right() Coordinate {
 func (c Coordinate) Up() Coordinate {
 	result := Coordinate{
 		X: c.X,
-		Y: c.Y - 1,
+		Y: c.Y + 1,
 	}
 	return result
 }
@@ -33,7 +33,7 @@ func (c Coordinate) Up() Coordinate {
 func (c Coordinate) Down() Coordinate {
 	result := Coordinate{
 		X: c.X,
-		Y: c.Y + 1,
+		Y: c.Y - 1,
 	}
 	return result
 }
