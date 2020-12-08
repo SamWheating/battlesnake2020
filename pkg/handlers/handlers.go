@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/SamWheating/battlesnake2020/pkg/lookahead"
 	"github.com/SamWheating/battlesnake2020/pkg/structs"
@@ -13,6 +14,7 @@ import (
 
 // return a random 24-bit hex colour like #A1B514
 func getRandomHex() string {
+	rand.Seed(time.Now().UTC().UnixNano())
 	const hexchars = "1234567890ABCDEF"
 	b := make([]byte, 7)
 	for i := range b {
@@ -67,10 +69,10 @@ func Move(w http.ResponseWriter, r *http.Request) {
 	depthArg := r.URL.Query().Get("depth")
 	countArg := r.URL.Query().Get("count")
 	if depthArg == "" {
-		depthArg = "10"
+		depthArg = "5"
 	}
 	if countArg == "" {
-		countArg = "10000"
+		countArg = "5000"
 	}
 	depth, _ := strconv.Atoi(depthArg)
 	count, _ := strconv.Atoi(countArg)

@@ -1,8 +1,8 @@
 package lookahead
 
 import (
-	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/SamWheating/battlesnake2020/pkg/heuristics"
@@ -16,30 +16,44 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 		scores[direction] = []int{}
 	}
 	moves := SampleRandomSnakeMoves(state.Board, depth, count)
-	for _, move := range moves {
-		//board := ApplyMovesToBoard(move, state.Board)
-		//score := heuristics.HeadRoom(board, state.You.ID)
-		score := scoreScenario(move, state, depth)
-		direction := move[state.You.ID][0]
-		scores[direction] = append(scores[direction], score)
-	}
+	results := make(map[string](chan int))
+	var wg sync.WaitGroup
 
-	fmt.Println("\n")
-	max := -10.0
+	results["left"] = make(chan int, count)
+	results["right"] = make(chan int, count)
+	results["up"] = make(chan int, count)
+	results["down"] = make(chan int, count)
+
+	for _, move := range moves {
+		//score := scoreScenario(move, state, depth, channel) // adds (score, direction)
+		wg.Add(1)
+		go scoreScenario(move, state, depth, &wg, results)
+	}
+	wg.Wait()
+	max := -10000.0
 	choice := directions[rand.Int()%4] // a random default direction
-	for dir, all_scores := range scores {
+
+	close(results["left"])
+	close(results["right"])
+	close(results["up"])
+	close(results["down"])
+
+	for _, direction := range directions {
+		// fmt.Println(direction)
+		count := len(results[direction])
 		total := 0
-		for _, score := range all_scores {
-			total += score
+		for i := range results[direction] {
+			total += i
 		}
-		dirScore := float64(total) / float64(len(all_scores))
+		//scores[direction] = total / count
+		dirScore := float64(total) / float64(count)
 		if dirScore > max {
-			choice = dir
+			choice = direction
 			max = dirScore
 		}
-		fmt.Println(dir, dirScore)
+		// fmt.Println(direction, dirScore)
 	}
-	fmt.Printf("go %s\n", choice)
+	// fmt.Printf("go %s\n", choice)
 	return choice
 }
 
@@ -148,10 +162,12 @@ func IsStarved(snake structs.Snake) bool {
 	return false
 }
 
-func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth int) int {
+func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth int, wg *sync.WaitGroup, results map[string](chan int)) {
+	//func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth int, results map[string](chan int)) {
 	// snake1: [left, right, down]
 	newBoard := state.Board.Clone()
-
+	direction := moves[state.You.ID][0]
+	defer wg.Done()
 	for i := 0; i < depth; i++ { // [left, right, down]
 		snakes := []structs.Snake{}
 		for j, snake := range newBoard.Snakes {
@@ -180,10 +196,15 @@ func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth i
 			}
 		}
 		if !alive {
-			return -1 * (depth - i) // TODO: improve this
+			if i == 0 {
+				results[direction] <- -100
+				return
+			}
+			results[direction] <- -1 * (depth - i)
+			return
 		}
 	}
 	// if we made it all n turns, return the heuristic
-	return heuristics.HeadRoom(newBoard, state.You.ID)
-
+	results[direction] <- heuristics.HeadRoom(newBoard, state.You.ID)
+	return
 }
