@@ -1,7 +1,6 @@
 package lookahead
 
 import (
-	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -40,7 +39,7 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 	close(results["down"])
 
 	for _, direction := range directions {
-		fmt.Println(direction)
+		// fmt.Println(direction)
 		count := len(results[direction])
 		total := 0
 		for i := range results[direction] {
@@ -52,9 +51,9 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 			choice = direction
 			max = dirScore
 		}
-		fmt.Println(direction, dirScore)
+		// fmt.Println(direction, dirScore)
 	}
-	fmt.Printf("go %s\n", choice)
+	// fmt.Printf("go %s\n", choice)
 	return choice
 }
 
