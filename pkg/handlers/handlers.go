@@ -25,13 +25,24 @@ func getRandomHex() string {
 }
 
 func Start(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "OK.")
+}
+
+func End(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "OK.")
+}
+
+func Index(w http.ResponseWriter, r *http.Request) {
 	HEADTYPES := []string{"beluga", "safe"}
 	TAILTYPES := []string{"round-bum", "curled"}
-	resp := structs.StartResponse{}
+	resp := structs.IndexResponse{}
+
 	// These are used to determine the appearance of the snake
-	resp.Headtype = HEADTYPES[rand.Intn(len(HEADTYPES))]
-	resp.Tailtype = TAILTYPES[rand.Intn(len(TAILTYPES))]
+	resp.Head = HEADTYPES[rand.Intn(len(HEADTYPES))]
+	resp.Tail = TAILTYPES[rand.Intn(len(TAILTYPES))]
 	resp.Color = getRandomHex()
+	resp.Author = "SamWheating"
+	resp.APIVersion = "1"
 
 	js, err := json.Marshal(resp)
 	if err != nil {
@@ -41,20 +52,11 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Write(js)
-}
-
-func End(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "OK.")
-}
-
-func Ping(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "OK.")
-}
-
-func Index(w http.ResponseWriter, r *http.Request) {
-	url := "https://www.google.com/search?q=snake&source=lnms&tbm=isch"
-	http.Redirect(w, r, url, 302)
+	_, err = w.Write(js)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func Move(w http.ResponseWriter, r *http.Request) {
