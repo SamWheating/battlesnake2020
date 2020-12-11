@@ -71,17 +71,12 @@ type EndRequest struct {
 	You   string
 }
 
-type StartRequest struct {
-	Game  string `json:"game,omitempty"`
-	Turn  string `json:"turn,omitempty"`
-	Board string `json:"board,omitempty"`
-	You   string `json:"you,omitempty"`
-}
-
-type StartResponse struct {
-	Color    string
-	Headtype string
-	Tailtype string
+type IndexResponse struct {
+	Color      string `json:"color"`
+	Head       string `json:"head"`
+	Tail       string `json:"tail"`
+	APIVersion string `json:"apiversion"`
+	Author     string `json:"author"`
 }
 
 type Game struct {
