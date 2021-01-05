@@ -78,40 +78,28 @@ func TestFloodFillSomeEmpty(t *testing.T) {
 
 func TestHeadRoom(t *testing.T) {
 
-	request := structs.MoveRequest{
-		You: structs.Snake{
-			Body: []structs.Coordinate{
-				structs.Coordinate{
-					X: 0,
-					Y: 1,
-				},
-				structs.Coordinate{
-					X: 1,
-					Y: 1,
-				},
-			},
-		},
-		Board: structs.Board{
-			Height: 2,
-			Width:  2,
-			Snakes: []structs.Snake{
-				structs.Snake{
-					Body: []structs.Coordinate{
-						structs.Coordinate{
-							X: 0,
-							Y: 1,
-						},
-						structs.Coordinate{
-							X: 1,
-							Y: 1,
-						},
+	board := structs.Board{
+		Height: 2,
+		Width:  2,
+		Snakes: []structs.Snake{
+			structs.Snake{
+				Health: 100,
+				ID:     "snake",
+				Body: []structs.Coordinate{
+					structs.Coordinate{
+						X: 0,
+						Y: 1,
+					},
+					structs.Coordinate{
+						X: 1,
+						Y: 1,
 					},
 				},
 			},
 		},
 	}
 
-	got := heuristics.HeadRoom(request)
+	got := heuristics.HeadRoom(board, "snake")
 	if got != 3 {
 		t.Errorf("Floodfilled to %d, expected 3", got)
 	}
@@ -119,53 +107,41 @@ func TestHeadRoom(t *testing.T) {
 
 func TestHeadRoomFullBoard(t *testing.T) {
 
-	request := structs.MoveRequest{
-		You: structs.Snake{
-			Body: []structs.Coordinate{
-				structs.Coordinate{
-					X: 0,
-					Y: 1,
-				},
-				structs.Coordinate{
-					X: 1,
-					Y: 1,
-				},
-			},
-		},
-		Board: structs.Board{
-			Height: 2,
-			Width:  2,
-			Snakes: []structs.Snake{
-				structs.Snake{
-					Body: []structs.Coordinate{
-						structs.Coordinate{
-							X: 0,
-							Y: 1,
-						},
-						structs.Coordinate{
-							X: 1,
-							Y: 1,
-						},
+	board := structs.Board{
+		Height: 2,
+		Width:  2,
+		Snakes: []structs.Snake{
+			structs.Snake{
+				Body: []structs.Coordinate{
+					structs.Coordinate{
+						X: 0,
+						Y: 1,
+					},
+					structs.Coordinate{
+						X: 1,
+						Y: 1,
 					},
 				},
-				structs.Snake{
-					Body: []structs.Coordinate{
-						structs.Coordinate{
-							X: 0,
-							Y: 0,
-						},
-						structs.Coordinate{
-							X: 1,
-							Y: 0,
-						},
+			},
+			structs.Snake{
+				ID:     "snek",
+				Health: 100,
+				Body: []structs.Coordinate{
+					structs.Coordinate{
+						X: 0,
+						Y: 0,
+					},
+					structs.Coordinate{
+						X: 1,
+						Y: 0,
 					},
 				},
 			},
 		},
 	}
 
-	got := heuristics.HeadRoom(request)
-	if got != 1 {
-		t.Errorf("Floodfilled to %d, expected 3", got)
+	got := heuristics.HeadRoom(board, "snek")
+	if got != 0 {
+		t.Errorf("Floodfilled to %d, expected 0", got)
 	}
 }
