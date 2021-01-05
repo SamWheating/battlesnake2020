@@ -1,2 +1,2 @@
 runtime: go112 # replace with go111 for Go 1.11
-instance_class: F4
+instance_class: F1
