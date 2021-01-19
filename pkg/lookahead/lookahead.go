@@ -72,7 +72,8 @@ func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[str
 					direction = directions[rand.Intn(len(directions))]
 					if j == 0 {
 						break
-					} else if !IsOpposite(direction, moves[j-1]) {
+						// this move can't be one which doubles back on itself or hits a wall
+					} else if !IsOpposite(direction, moves[j-1]) && !GoesOutOfBounds(board, snake.Body[0], moves) {
 						break
 					}
 				}
@@ -97,6 +98,27 @@ func IsOpposite(move1 string, move2 string) bool {
 		return move2 == "up"
 	}
 	return false
+}
+
+// Returns true if the given path will steer the snake into the wall
+// this can be sped wayy if we eliminate the repeated computation, but for now I just want to try this.
+func GoesOutOfBounds(board structs.Board, head structs.Coordinate, moves []string) bool {
+
+	for _, move := range moves {
+		switch move {
+		case "left":
+			head.Left()
+		case "right":
+			head.Right()
+		case "up":
+			head.Up()
+		case "down":
+			head.Down()
+		}
+	}
+
+	return IsOutOfBounds(board, head)
+
 }
 
 // applyMovesToBoard applies a set of moves to a board, thus advancing the state of the game by one tick.
