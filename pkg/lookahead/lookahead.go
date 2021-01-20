@@ -1,6 +1,7 @@
 package lookahead
 
 import (
+	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -47,17 +48,18 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 		}
 		//scores[direction] = total / count
 		dirScore := float64(total) / float64(count)
+		fmt.Println(direction, dirScore)
 		if dirScore > max {
 			choice = direction
 			max = dirScore
 		}
-		// fmt.Println(direction, dirScore)
 	}
-	// fmt.Printf("go %s\n", choice)
+	fmt.Printf("go %s\n", choice)
 	return choice
 }
 
 // SampleRandomSnakeMoves generates <count> possible combinations of <depth> moves for each snake
+// The moves aren't great but at the very least won't doubel back on itself or hit a wall
 func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[string][]string {
 	rand.Seed(time.Now().Unix())
 	snakemoves := make([]map[string][]string, count)
@@ -65,18 +67,42 @@ func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[str
 	for i := 0; i < count; i++ {
 		scenario := map[string][]string{}
 		for _, snake := range board.Snakes {
+
 			moves := make([]string, depth)
+			head := structs.Coordinate{X: snake.Body[0].X, Y: snake.Body[0].Y}
 			for j := 0; j < depth; j++ {
-				var direction string
-				for {
-					direction = directions[rand.Intn(len(directions))]
-					if j == 0 {
-						break
-						// this move can't be one which doubles back on itself or hits a wall
-					} else if !IsOpposite(direction, moves[j-1]) && !GoesOutOfBounds(board, snake.Body[0], moves) {
-						break
+
+				bad_directions := make(map[string]bool) // just a set to keep track of unsafe moves
+
+				// don't hit a wall
+				if head.X == 0 {
+					bad_directions["left"] = true
+				}
+				if head.X == board.Width-1 {
+					bad_directions["right"] = true
+				}
+				if head.Up().Y < 0 || head.Up().Y >= board.Height {
+					bad_directions["up"] = true
+				}
+				if head.Down().Y < 0 || head.Down().Y >= board.Height {
+					bad_directions["down"] = true
+				}
+
+				// don't double back on ourselves
+				if j > 1 {
+					bad_directions[Opposite(moves[j-1])] = true
+				}
+
+				good_directions := []string{}
+				for _, direction := range directions {
+					if !bad_directions[direction] {
+						good_directions = append(good_directions, direction)
 					}
 				}
+
+				// only make a safe move
+				direction := good_directions[rand.Intn(len(good_directions))]
+				head = head.Move(direction)
 				moves[j] = direction
 			}
 			scenario[snake.ID] = moves
@@ -86,39 +112,18 @@ func SampleRandomSnakeMoves(board structs.Board, depth int, count int) []map[str
 	return snakemoves
 }
 
-func IsOpposite(move1 string, move2 string) bool {
-	switch move1 {
+func Opposite(move string) string {
+	switch move {
 	case "left":
-		return move2 == "right"
+		return "right"
 	case "right":
-		return move2 == "left"
+		return "left"
 	case "up":
-		return move2 == "down"
+		return "down"
 	case "down":
-		return move2 == "up"
+		return "up"
 	}
-	return false
-}
-
-// Returns true if the given path will steer the snake into the wall
-// this can be sped wayy if we eliminate the repeated computation, but for now I just want to try this.
-func GoesOutOfBounds(board structs.Board, head structs.Coordinate, moves []string) bool {
-
-	for _, move := range moves {
-		switch move {
-		case "left":
-			head.Left()
-		case "right":
-			head.Right()
-		case "up":
-			head.Up()
-		case "down":
-			head.Down()
-		}
-	}
-
-	return IsOutOfBounds(board, head)
-
+	return "error or something"
 }
 
 // applyMovesToBoard applies a set of moves to a board, thus advancing the state of the game by one tick.
@@ -228,5 +233,4 @@ func scoreScenario(moves map[string][]string, state structs.MoveRequest, depth i
 	}
 	// if we made it all n turns, return the heuristic
 	results[direction] <- heuristics.HeadRoom(newBoard, state.You.ID)
-	return
 }
