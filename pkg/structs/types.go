@@ -5,6 +5,13 @@ type Coordinate struct {
 	Y int `json:"y"`
 }
 
+// in the local environment, the bottom is y=height,
+// in prod the bottom is y=0
+// uncomment one of these lines to ensure we get the expected behaviour
+
+// const UP_Y_DELTA = -1 // for local development
+const UP_Y_DELTA = 1 // for prod deployment
+
 // Left goes left
 func (c Coordinate) Left() Coordinate {
 	result := Coordinate{
@@ -22,28 +29,10 @@ func (c Coordinate) Right() Coordinate {
 	return result
 }
 
-//// prod mode
-// func (c Coordinate) Up() Coordinate {
-// 	result := Coordinate{
-// 		X: c.X,
-// 		Y: c.Y + 1,
-// 	}
-// 	return result
-// }
-
-// func (c Coordinate) Down() Coordinate {
-// 	result := Coordinate{
-// 		X: c.X,
-// 		Y: c.Y - 1,
-// 	}
-// 	return result
-// }
-
-// dev mode
 func (c Coordinate) Up() Coordinate {
 	result := Coordinate{
 		X: c.X,
-		Y: c.Y - 1,
+		Y: c.Y + UP_Y_DELTA,
 	}
 	return result
 }
@@ -51,7 +40,7 @@ func (c Coordinate) Up() Coordinate {
 func (c Coordinate) Down() Coordinate {
 	result := Coordinate{
 		X: c.X,
-		Y: c.Y + 1,
+		Y: c.Y - UP_Y_DELTA,
 	}
 	return result
 }
