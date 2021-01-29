@@ -3,6 +3,7 @@ package lookahead
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -39,22 +40,24 @@ func Lookahead(state structs.MoveRequest, depth int, count int) string {
 	close(results["up"])
 	close(results["down"])
 
+	var log_line strings.Builder
+	fmt.Fprintf(&log_line, "%d -%s\n", state.Turn, state.You.Name)
+
 	for _, direction := range directions {
-		// fmt.Println(direction)
 		count := len(results[direction])
 		total := 0
 		for i := range results[direction] {
 			total += i
 		}
-		//scores[direction] = total / count
 		dirScore := float64(total) / float64(count)
-		fmt.Println(direction, dirScore)
+		fmt.Fprintf(&log_line, "%s: %f\n", direction, dirScore)
 		if dirScore > max {
 			choice = direction
 			max = dirScore
 		}
 	}
-	fmt.Printf("go %s\n", choice)
+	fmt.Fprintf(&log_line, "chose: %s\n", choice)
+	fmt.Println(log_line.String())
 	return choice
 }
 
